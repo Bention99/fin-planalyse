@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <body>
+    <h1>Categories</h1>
+
+    <ul>
+      {{range .Categories}}
+        <li>{{.Name}} ({{.Type}})</li>
+      {{else}}
+        <li>No categories found</li>
+      {{end}}
+    </ul>
+  </body>
+</html>
