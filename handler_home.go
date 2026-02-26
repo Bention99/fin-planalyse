@@ -13,7 +13,11 @@ func (a *app) handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = userID
+	user, err := a.queries.GetUserByID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "failed to load user: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	cats, err := a.queries.GetCategories(r.Context())
 	if err != nil {
@@ -22,8 +26,10 @@ func (a *app) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
+		User       database.GetUserByIDRow
 		Categories []database.Category
 	}{
+		User:       user,
 		Categories: cats,
 	}
 
