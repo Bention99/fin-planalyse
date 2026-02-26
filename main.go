@@ -46,7 +46,8 @@ func main() {
 
 	mux.HandleFunc("/register", a.handleRegister)
 	mux.HandleFunc("/login", a.handleLogin)
-	
+	mux.HandleFunc("/logout", a.handleLogout)
+
 	addr := ":8080"
 	log.Printf("http://localhost%s\n", addr)
 

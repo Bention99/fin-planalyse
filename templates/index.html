@@ -4,6 +4,10 @@
 
     <p>Logged in as: <strong>{{.User.Email}}</strong></p>
 
+    <form method="POST" action="/logout" style="display:inline;">
+      <button type="submit">Logout</button>
+    </form>
+
     <h1>Categories</h1>
 
     <ul>
