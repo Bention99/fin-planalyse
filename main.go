@@ -36,20 +36,26 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("./templates"))))
+	fs := http.StripPrefix("/static/", http.FileServer(http.Dir("./static")))
+mux.Handle("GET /static/", fs)
+mux.Handle("HEAD /static/", fs)
 
-	mux.HandleFunc("/", a.handleRoot)
+	mux.HandleFunc("GET /", a.handleRoot)
 
-	mux.HandleFunc("/home", a.requireAuth(a.handleHome))
-	mux.HandleFunc("/categories", a.requireAuth(a.handleCreateCategory))
-	mux.HandleFunc("/categories/delete", a.requireAuth(a.handleDeleteCategory))
+	mux.HandleFunc("GET /home", a.requireAuth(a.handleHome))
 
-	mux.HandleFunc("/register", a.handleRegister)
-	mux.HandleFunc("/login", a.handleLogin)
-	mux.HandleFunc("/logout", a.handleLogout)
+	mux.HandleFunc("POST /categories", a.requireAuth(a.handleCreateCategory))
+	mux.HandleFunc("POST /categories/delete", a.requireAuth(a.handleDeleteCategory))
+
+	mux.HandleFunc("GET /register", a.handleRegister)
+	mux.HandleFunc("POST /register", a.handleRegister)
+
+	mux.HandleFunc("GET /login", a.handleLogin)
+	mux.HandleFunc("POST /login", a.handleLogin)
+
+	mux.HandleFunc("POST /logout", a.handleLogout)
 
 	addr := ":8080"
 	log.Printf("http://localhost%s\n", addr)
-
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Fatal(http.ListenAndServe(addr, mux))
 }
