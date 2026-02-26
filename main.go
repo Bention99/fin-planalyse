@@ -28,17 +28,21 @@ func main() {
 	}
 	defer db.Close()
 
+	funcMap := template.FuncMap{
+		"formatCents": formatCents,
+	}
+
 	a := &app{
 		db:      db,
 		queries: database.New(db),
-		tpl:     template.Must(template.ParseGlob("templates/*.html")),
+		tpl:     template.Must(template.New("index.html").Funcs(funcMap).ParseGlob("templates/*.html")),
 	}
 
 	mux := http.NewServeMux()
 
 	fs := http.StripPrefix("/static/", http.FileServer(http.Dir("./static")))
-mux.Handle("GET /static/", fs)
-mux.Handle("HEAD /static/", fs)
+	mux.Handle("GET /static/", fs)
+	mux.Handle("HEAD /static/", fs)
 
 	mux.HandleFunc("GET /", a.handleRoot)
 
@@ -54,6 +58,9 @@ mux.Handle("HEAD /static/", fs)
 	mux.HandleFunc("POST /login", a.handleLogin)
 
 	mux.HandleFunc("POST /logout", a.handleLogout)
+
+	mux.HandleFunc("POST /transactions", a.requireAuth(a.handleCreateTransaction))
+	mux.HandleFunc("POST /transactions/delete", a.requireAuth(a.handleDeleteTransaction))
 
 	addr := ":8080"
 	log.Printf("http://localhost%s\n", addr)

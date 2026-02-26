@@ -8,23 +8,6 @@
       <button type="submit">Logout</button>
     </form>
 
-    <h1>Categories</h1>
-
-    <ul>
-      {{range .Categories}}
-        <li>
-          {{.Name}} ({{.Type}})
-
-          <form method="POST" action="/categories/delete" style="display:inline;">
-            <input type="hidden" name="id" value="{{.ID}}">
-            <button type="submit">Delete</button>
-          </form>
-        </li>
-      {{else}}
-        <li>No categories found</li>
-      {{end}}
-    </ul>
-
     <h2>Add category</h2>
     <form method="POST" action="/categories">
       <label>
@@ -42,5 +25,81 @@
 
       <button type="submit">Create</button>
     </form>
+
+    <h1>Categories</h1>
+
+    <ul>
+      {{range .Categories}}
+        <li>
+          {{.Name}} ({{.Type}})
+
+          <form method="POST" action="/categories/delete" style="display:inline;">
+            <input type="hidden" name="id" value="{{.ID}}">
+            <button type="submit">Delete</button>
+          </form>
+        </li>
+      {{else}}
+        <li>No categories found</li>
+      {{end}}
+    </ul>
+
+    <h2>Add transaction</h2>
+    <form method="POST" action="/transactions">
+      <label>Date: <input type="date" name="date" required></label>
+
+      <label>Amount: <input name="amount" required></label>
+
+      <label>Category:
+        <select name="category_id" required>
+          {{range .Categories}}
+            <option value="{{.ID}}">{{.Name}} ({{.Type}})</option>
+          {{end}}
+        </select>
+      </label>
+
+      <label>
+        Optional:
+        <input type="checkbox" name="is_optional">
+      </label>
+
+      <button type="submit">Add</button>
+    </form>
+
+    <h2>Transactions</h2>
+
+    <table border="1" cellpadding="6" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Optional</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Transactions}}
+          <tr>
+            <td>{{.Date.Format "2006-01-02"}}</td>
+            <td>{{.CategoryName}}</td>
+            <td>{{.CategoryType}}</td>
+            <td>{{formatCents .Amount}}</td>
+            <td>{{if .IsOptional}}yes{{else}}no{{end}}</td>
+            <td>
+              <form method="POST" action="/transactions/delete" style="display:inline;">
+                <input type="hidden" name="id" value="{{.ID}}">
+                <button type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {{else}}
+          <tr>
+            <td colspan="6">No transactions yet</td>
+          </tr>
+        {{end}}
+      </tbody>
+    </table>
+
   </body>
 </html>
