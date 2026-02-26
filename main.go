@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	_ "github.com/jackc/pgx/v5/stdlib" // pgx driver for database/sql
-	// adjust imports to your module path:
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 
 	"github.com/Bention99/fin-planalyse/internal/database"
@@ -37,11 +36,11 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// serve static files (css/js/images)
 	mux.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("./templates"))))
 
-	// page that shows categories
 	mux.HandleFunc("/", a.handleHome)
+	mux.HandleFunc("/categories", a.handleCreateCategory)
+	mux.HandleFunc("/categories/delete", a.handleDeleteCategory)
 	addr := ":8080"
 	log.Printf("http://localhost%s\n", addr)
 

@@ -5,10 +5,35 @@
 
     <ul>
       {{range .Categories}}
-        <li>{{.Name}} ({{.Type}})</li>
+        <li>
+          {{.Name}} ({{.Type}})
+
+          <form method="POST" action="/categories/delete" style="display:inline;">
+            <input type="hidden" name="id" value="{{.ID}}">
+            <button type="submit">Delete</button>
+          </form>
+        </li>
       {{else}}
         <li>No categories found</li>
       {{end}}
     </ul>
+
+    <h2>Add category</h2>
+    <form method="POST" action="/categories">
+      <label>
+        Name:
+        <input name="name" required />
+      </label>
+
+      <label>
+        Type:
+        <select name="type" required>
+          <option value="expense">expense</option>
+          <option value="income">income</option>
+        </select>
+      </label>
+
+      <button type="submit">Create</button>
+    </form>
   </body>
 </html>
