@@ -51,11 +51,11 @@ func main() {
 	mux.HandleFunc("POST /categories", a.requireAuth(a.handleCreateCategory))
 	mux.HandleFunc("POST /categories/delete", a.requireAuth(a.handleDeleteCategory))
 
-	mux.HandleFunc("GET /register", a.handleRegister)
-	mux.HandleFunc("POST /register", a.handleRegister)
+	mux.HandleFunc("GET /register", a.handleRegisterGet)
+	mux.HandleFunc("POST /register", a.handleRegisterPost)
 
-	mux.HandleFunc("GET /login", a.handleLogin)
-	mux.HandleFunc("POST /login", a.handleLogin)
+	mux.HandleFunc("GET /login", a.handleLoginGet)
+	mux.HandleFunc("POST /login", a.handleLoginPost)
 
 	mux.HandleFunc("POST /logout", a.handleLogout)
 

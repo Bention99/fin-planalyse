@@ -7,11 +7,6 @@ import (
 )
 
 func (a *app) handleDeleteCategory(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form", http.StatusBadRequest)
 		return
@@ -23,17 +18,16 @@ func (a *app) handleDeleteCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := uuid.Parse(idStr)
+	categoryID, err := uuid.Parse(idStr)
 	if err != nil {
 		http.Error(w, "invalid uuid", http.StatusBadRequest)
 		return
 	}
 
-	err = a.queries.DeleteCategory(r.Context(), id)
-	if err != nil {
+	if err := a.queries.DeleteCategory(r.Context(), categoryID); err != nil {
 		http.Error(w, "could not delete category: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
