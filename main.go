@@ -31,16 +31,22 @@ func main() {
 	a := &app{
 		db:      db,
 		queries: database.New(db),
-		tpl:     template.Must(template.ParseFiles("templates/index.html")),
+		tpl:     template.Must(template.ParseGlob("templates/*.html")),
 	}
 
 	mux := http.NewServeMux()
 
 	mux.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("./templates"))))
 
-	mux.HandleFunc("/", a.handleHome)
-	mux.HandleFunc("/categories", a.handleCreateCategory)
-	mux.HandleFunc("/categories/delete", a.handleDeleteCategory)
+	mux.HandleFunc("/", a.handleRoot)
+
+	mux.HandleFunc("/home", a.requireAuth(a.handleHome))
+	mux.HandleFunc("/categories", a.requireAuth(a.handleCreateCategory))
+	mux.HandleFunc("/categories/delete", a.requireAuth(a.handleDeleteCategory))
+
+	mux.HandleFunc("/register", a.handleRegister)
+	mux.HandleFunc("/login", a.handleLogin)
+	
 	addr := ":8080"
 	log.Printf("http://localhost%s\n", addr)
 
