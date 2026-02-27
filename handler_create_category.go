@@ -26,7 +26,7 @@ func (a *app) handleCreateCategory(w http.ResponseWriter, r *http.Request) {
 		Type: database.TransactionType(typ),
 	})
 	if err != nil {
-		http.Error(w, "could not create category: "+err.Error(), http.StatusBadRequest)
+		a.renderHomeWithError(w, r, "Category already exists")
 		return
 	}
 
