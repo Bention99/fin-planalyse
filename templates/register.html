@@ -9,6 +9,12 @@
       <button type="submit">Register</button>
     </form>
 
+    {{if .Error}}
+      <div style="color: red; margin-bottom: 10px;">
+        {{.Error}}
+      </div>
+    {{end}}
+
     <p><a href="/login">Already have an account? Login</a></p>
   </body>
 </html>
