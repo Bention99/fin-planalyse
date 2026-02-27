@@ -1,110 +1,121 @@
 <!doctype html>
 <html>
-  <body>
+<head>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
 
-    <p>Logged in as: <strong>{{.User.Email}}</strong></p>
+  <div class="container">
 
-    <form method="POST" action="/logout" style="display:inline;">
-      <button type="submit">Logout</button>
-    </form>
+    <header class="topbar">
+      <div>
+        Logged in as: <strong>{{.User.Email}}</strong>
+      </div>
+      <form method="POST" action="/logout">
+        <button class="btn btn-secondary" type="submit">Logout</button>
+      </form>
+    </header>
 
-    <h2>Add category</h2>
-    <form method="POST" action="/categories">
-      <label>
-        Name:
-        <input name="name" required />
-      </label>
-
-      <label>
-        Type:
-        <select name="type" required>
-          <option value="expense">expense</option>
-          <option value="income">income</option>
-        </select>
-      </label>
-
-      <button type="submit">Create</button>
-    </form>
     {{if .Error}}
-      <div style="color: red; margin-bottom: 10px;">
+      <div class="alert">
         {{.Error}}
       </div>
     {{end}}
 
-    <h1>Categories</h1>
+    <section class="card">
+      <h2>Add Category</h2>
+      <form method="POST" action="/categories" class="form-row">
+        <input name="name" placeholder="Category name" required />
 
-    <ul>
-      {{range .Categories}}
-        <li>
-          {{.Name}} ({{.Type}})
+        <select name="type" required>
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </select>
 
-          <form method="POST" action="/categories/delete" style="display:inline;">
-            <input type="hidden" name="id" value="{{.ID}}">
-            <button type="submit">Delete</button>
-          </form>
-        </li>
-      {{else}}
-        <li>No categories found</li>
-      {{end}}
-    </ul>
+        <button class="btn" type="submit">Create</button>
+      </form>
+    </section>
 
-    <h2>Add transaction</h2>
-    <form method="POST" action="/transactions">
-      <label>Date: <input type="date" name="date" required></label>
+    <section class="card">
+      <h2>Categories</h2>
+      <div class="scrollbox">
+        <ul class="category-list">
+          {{range .Categories}}
+            <li>
+              <span>{{.Name}} ({{.Type}})</span>
+              <form method="POST" action="/categories/delete">
+                <input type="hidden" name="id" value="{{.ID}}">
+                <button class="btn btn-danger" type="submit">Delete</button>
+              </form>
+            </li>
+          {{else}}
+            <li>No categories found</li>
+          {{end}}
+        </ul>
+      </div>
+    </section>
 
-      <label>Amount: <input name="amount" required></label>
+    <section class="card">
+      <h2>Add Transaction</h2>
+      <form method="POST" action="/transactions" class="form-row">
+        <input type="date" name="date" required>
+        <input name="amount" placeholder="Amount" required>
 
-      <label>Category:
         <select name="category_id" required>
           {{range .Categories}}
             <option value="{{.ID}}">{{.Name}} ({{.Type}})</option>
           {{end}}
         </select>
-      </label>
 
-      <label>
-        Optional:
-        <input type="checkbox" name="is_optional">
-      </label>
+        <label class="checkbox">
+          <input type="checkbox" name="is_optional">
+          Optional
+        </label>
 
-      <button type="submit">Add</button>
-    </form>
+        <button class="btn" type="submit">Add</button>
+      </form>
+    </section>
 
-    <h2>Transactions</h2>
+    <section class="card">
+      <h2>Transactions</h2>
+      <div class="table-wrapper table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Optional</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .Transactions}}
+              <tr>
+                <td>{{.Date.Format "2006-01-02"}}</td>
+                <td>{{.CategoryName}}</td>
+                <td>{{.CategoryType}}</td>
+                <td>{{formatCents .Amount}}</td>
+                <td>{{if .IsOptional}}yes{{else}}no{{end}}</td>
+                <td>
+                  <form method="POST" action="/transactions/delete">
+                    <input type="hidden" name="id" value="{{.ID}}">
+                    <button class="btn btn-danger" type="submit">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {{else}}
+              <tr>
+                <td colspan="6">No transactions yet</td>
+              </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-    <table border="1" cellpadding="6" cellspacing="0">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Category</th>
-          <th>Type</th>
-          <th>Amount</th>
-          <th>Optional</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{range .Transactions}}
-          <tr>
-            <td>{{.Date.Format "2006-01-02"}}</td>
-            <td>{{.CategoryName}}</td>
-            <td>{{.CategoryType}}</td>
-            <td>{{formatCents .Amount}}</td>
-            <td>{{if .IsOptional}}yes{{else}}no{{end}}</td>
-            <td>
-              <form method="POST" action="/transactions/delete" style="display:inline;">
-                <input type="hidden" name="id" value="{{.ID}}">
-                <button type="submit">Delete</button>
-              </form>
-            </td>
-          </tr>
-        {{else}}
-          <tr>
-            <td colspan="6">No transactions yet</td>
-          </tr>
-        {{end}}
-      </tbody>
-    </table>
+  </div>
 
-  </body>
+</body>
 </html>
