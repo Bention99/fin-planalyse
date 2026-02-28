@@ -43,10 +43,12 @@
           {{range .CategoriesIncome}}
             <li>
               <span>{{.Name}} ({{.Type}})</span>
-              <form method="POST" action="/categories/delete">
-                <input type="hidden" name="id" value="{{.ID}}">
-                <button class="btn btn-danger" type="submit">Delete</button>
-              </form>
+              {{if not .IsSystem}}
+                  <form method="POST" action="/categories/delete">
+                      <input type="hidden" name="id" value="{{.ID}}">
+                      <button class="btn btn-danger" type="submit">Delete</button>
+                  </form>
+              {{end}}
             </li>
           {{else}}
             <li>No categories found</li>
@@ -62,10 +64,12 @@
           {{range .CategoriesExpense}}
             <li>
               <span>{{.Name}} ({{.Type}})</span>
-              <form method="POST" action="/categories/delete">
-                <input type="hidden" name="id" value="{{.ID}}">
-                <button class="btn btn-danger" type="submit">Delete</button>
-              </form>
+              {{if not .IsSystem}}
+                  <form method="POST" action="/categories/delete">
+                      <input type="hidden" name="id" value="{{.ID}}">
+                      <button class="btn btn-danger" type="submit">Delete</button>
+                  </form>
+              {{end}}
             </li>
           {{else}}
             <li>No categories found</li>
