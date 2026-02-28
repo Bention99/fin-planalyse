@@ -9,6 +9,7 @@ import (
 	"os"
 	"fmt"
 	"time"
+	"strings"
 )
 
 type ExtractedResponse struct {
@@ -74,38 +75,51 @@ func UploadFile(apiKey, filePath string) (string, error) {
 	return result.ID, nil
 }
 
-func CreateResponse(apiKey string, promptKey string, fileID string) (ExtractedResponse, error) {
+func CreateResponse(apiKey string, promptKey string, fileID string, incomeCategories []string, expenseCategories []string) (ExtractedResponse, error) {
+	incomeStr := strings.Join(incomeCategories, ", ")
+	expenseStr := strings.Join(expenseCategories, ", ")
 
 	payload := map[string]interface{}{
-		"model": "gpt-4.1",
-		"store": false,
-		"prompt": map[string]interface{}{
-			"id": promptKey,
-			"version": "8",
-		},
-		"input": []map[string]interface{}{
-			{
-				"role": "user",
-				"content": []map[string]interface{}{
-					{
-						"type": "input_text",
-						"text": "Extract all transactions from the provided bank statement and return the result as JSON.",
-					},
-					{
-						"type": "input_file",
-						"file_id": fileID,
-					},
+	"model": "gpt-4.1",
+	"store": false,
+	"prompt": map[string]interface{}{
+		"id":      promptKey,
+		"version": "9",
+	},
+	"input": []map[string]interface{}{
+		{
+			"role": "user",
+			"content": []map[string]interface{}{
+				{
+					"type": "input_text",
+					"text": fmt.Sprintf(
+						"Extract all transactions from the provided bank statement and return JSON.\n\n"+
+							"STRICT CATEGORY RULE:\n"+
+							"- The category MUST be exactly one of the predefined categories below.\n"+
+							"- Do NOT invent new categories.\n"+
+							"- If unsure, choose the closest matching category from the list.\n\n"+
+							"Predefined income categories:\n%s\n\n"+
+							"Predefined expense categories:\n%s\n\n"+
+							"Return only valid JSON following the required schema.",
+						incomeStr,
+						expenseStr,
+					),
+				},
+				{
+					"type":    "input_file",
+					"file_id": fileID,
 				},
 			},
 		},
-		"text": map[string]interface{}{
-			"format": map[string]interface{}{
-				"type": "json_object",
-			},
+	},
+	"text": map[string]interface{}{
+		"format": map[string]interface{}{
+			"type": "json_object",
 		},
-		"temperature": 0.0,
-		"max_output_tokens": 3000,
-	}
+	},
+	"temperature":       0.0,
+	"max_output_tokens": 3000,
+}
 
 	jsonBody, err := json.Marshal(payload)
 	if err != nil {
@@ -128,7 +142,9 @@ func CreateResponse(apiKey string, promptKey string, fileID string) (ExtractedRe
 	defer resp.Body.Close()
 
 	bodyBytes, _ := io.ReadAll(resp.Body)
-
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return ExtractedResponse{}, fmt.Errorf("openai error: status=%d body=%s", resp.StatusCode, string(bodyBytes))
+	}
 
 	var apiResp struct {
 		Output []struct {
@@ -140,6 +156,14 @@ func CreateResponse(apiKey string, promptKey string, fileID string) (ExtractedRe
 
 	if err := json.Unmarshal(bodyBytes, &apiResp); err != nil {
 		return ExtractedResponse{}, err
+	}
+
+	if len(apiResp.Output) == 0 {
+		return ExtractedResponse{}, fmt.Errorf("no output returned from OpenAI")
+	}
+
+	if len(apiResp.Output[0].Content) == 0 {
+		return ExtractedResponse{}, fmt.Errorf("no content in OpenAI output")
 	}
 
 	jsonString := apiResp.Output[0].Content[0].Text

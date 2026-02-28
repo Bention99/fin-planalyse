@@ -5,6 +5,8 @@ import (
 	"os"
 	"io"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 func (a *app) handleUpload(w http.ResponseWriter, r *http.Request) {
@@ -48,5 +50,46 @@ func (a *app) handleUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("upload successful"))
+	userID, ok := userIDFromContext(r.Context())
+	if !ok {
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
+		return
+	}
+
+	uid := uuid.NullUUID{
+		UUID:  userID,
+		Valid: true,
+	}
+
+	catsIncome, err := a.queries.GetCategoriesIncome(r.Context(), uid)
+	if err != nil {
+		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	incomeCategories := make([]string, 0, len(catsIncome))
+	for _, row := range catsIncome {
+		incomeCategories = append(incomeCategories, row.Name)
+	}
+
+	catsExpense, err := a.queries.GetCategoriesExpense(r.Context(), uid)
+	if err != nil {
+		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	expenseCategories := make([]string, 0, len(catsExpense))
+	for _, row := range catsExpense {
+		expenseCategories = append(expenseCategories, row.Name)
+	}
+
+	err = uploadFile(incomeCategories, expenseCategories)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/home#transactions", http.StatusSeeOther)
+
+	//w.Write([]byte("upload successful"))
 }

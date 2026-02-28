@@ -4,14 +4,13 @@ import(
 	"fmt"
 	"os"
 	"path/filepath"
-	"log"
 
 	"github.com/joho/godotenv"
 
 	"github.com/Bention99/fin-planalyse/internal/openaiextract"
 )
 
-func uploadFile() {
+func uploadFile(catsIncome []string, catsExpense []string) error {
 	godotenv.Load(".env")
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
@@ -19,22 +18,23 @@ func uploadFile() {
 
 	uploadPath, err := getSingleUploadFilePath("./uploads")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fileID, err := openaiextract.UploadFile(apiKey, uploadPath)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	response, err := openaiextract.CreateResponse(apiKey, promptKey, fileID)
+	response, err := openaiextract.CreateResponse(apiKey, promptKey, fileID, catsIncome, catsExpense)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Println(response)
 
 	//os.Remove(uploadPath)
+	return nil
 }
 
 func getSingleUploadFilePath(dir string) (string, error) {
