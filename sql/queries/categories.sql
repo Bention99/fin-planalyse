@@ -39,7 +39,8 @@ RETURNING id, name, type;
 
 -- name: DeleteCategory :exec
 DELETE FROM categories
-WHERE id = $1;
+WHERE id = $1
+AND is_system = 'false';
 
 -- name: GetCategoryID :one
 SELECT id
