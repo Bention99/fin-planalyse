@@ -24,7 +24,20 @@ func (a *app) handleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	categoryIDStr := strings.TrimSpace(r.FormValue("category_id"))
+	categoryInput := strings.TrimSpace(r.FormValue("category_name"))
+	parts := strings.Split(categoryInput, " (")
+	if len(parts) != 2 {
+		return
+	}
+	name := parts[0]
+
+	cID, err := a.queries.GetCategoryID(r.Context(), name)
+	if err != nil {
+		http.Error(w, "couldn't fetch category ID", http.StatusBadRequest)
+		return
+	}
+
+	categoryIDStr := cID.String()
 	dateStr := strings.TrimSpace(r.FormValue("date"))
 	amountStr := strings.TrimSpace(r.FormValue("amount"))
 	isOptional := r.FormValue("is_optional") != ""

@@ -8,7 +8,9 @@ import (
 
 type HomeData struct {
 	User         database.GetUserByIDRow
-	Categories   []database.Category
+	Categories		[]database.Category
+	CategoriesIncome   []database.Category
+	CategoriesExpense   []database.Category
 	Transactions []database.GetTransactionsRow
 	Error        string
 }
@@ -32,6 +34,18 @@ func (a *app) handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	catsIncome, err := a.queries.GetCategoriesIncome(r.Context())
+	if err != nil {
+		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	catsExpense, err := a.queries.GetCategoriesExpense(r.Context())
+	if err != nil {
+		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	txs, err := a.queries.GetTransactions(r.Context(), userID)
 	if err != nil {
 		http.Error(w, "failed to load transactions: "+err.Error(), http.StatusInternalServerError)
@@ -40,7 +54,9 @@ func (a *app) handleHome(w http.ResponseWriter, r *http.Request) {
 
 	data := HomeData{
 		User:         user,
-		Categories:   cats,
+		Categories:		cats,
+		CategoriesIncome:   catsIncome,
+		CategoriesExpense:   catsExpense,
 		Transactions: txs,
 		Error:        "",
 	}
@@ -65,7 +81,19 @@ func (a *app) renderHomeWithError(w http.ResponseWriter, r *http.Request, msg st
 
 	cats, err := a.queries.GetCategories(r.Context())
 	if err != nil {
+		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	catsIncome, err := a.queries.GetCategoriesIncome(r.Context())
+	if err != nil {
 		http.Error(w, "failed to load categories", http.StatusInternalServerError)
+		return
+	}
+
+	catsExpense, err := a.queries.GetCategoriesExpense(r.Context())
+	if err != nil {
+		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -77,7 +105,9 @@ func (a *app) renderHomeWithError(w http.ResponseWriter, r *http.Request, msg st
 
 	data := HomeData{
 		User:         user,
-		Categories:   cats,
+		Categories:		cats,
+		CategoriesIncome:   catsIncome,
+		CategoriesExpense:   catsExpense,
 		Transactions: txs,
 		Error:        msg,
 	}

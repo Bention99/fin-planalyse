@@ -37,10 +37,29 @@
     </section>
 
     <section class="card">
-      <h2>Categories</h2>
+      <h2>Incomes</h2>
       <div class="scrollbox">
         <ul class="category-list">
-          {{range .Categories}}
+          {{range .CategoriesIncome}}
+            <li>
+              <span>{{.Name}} ({{.Type}})</span>
+              <form method="POST" action="/categories/delete">
+                <input type="hidden" name="id" value="{{.ID}}">
+                <button class="btn btn-danger" type="submit">Delete</button>
+              </form>
+            </li>
+          {{else}}
+            <li>No categories found</li>
+          {{end}}
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Expenses</h2>
+      <div class="scrollbox">
+        <ul class="category-list">
+          {{range .CategoriesExpense}}
             <li>
               <span>{{.Name}} ({{.Type}})</span>
               <form method="POST" action="/categories/delete">
@@ -61,11 +80,16 @@
         <input type="date" name="date" required>
         <input name="amount" placeholder="Amount" required>
 
-        <select name="category_id" required>
+        <label>
+          Category:
+          <input name="category_name" list="categories" placeholder="Start typing..." required>
+        </label>
+
+        <datalist id="categories">
           {{range .Categories}}
-            <option value="{{.ID}}">{{.Name}} ({{.Type}})</option>
+            <option value="{{.Name}} ({{.Type}})"></option>
           {{end}}
-        </select>
+        </datalist>
 
         <label class="checkbox">
           <input type="checkbox" name="is_optional">

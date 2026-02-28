@@ -25,7 +25,7 @@ func (a *app) handleDeleteCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := a.queries.DeleteCategory(r.Context(), categoryID); err != nil {
-		http.Error(w, "could not delete category: "+err.Error(), http.StatusInternalServerError)
+		a.renderHomeWithError(w, r, "Could not delete category: category already in use by a user")
 		return
 	}
 
