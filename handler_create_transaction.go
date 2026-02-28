@@ -71,7 +71,7 @@ func (a *app) handleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	http.Redirect(w, r, "/home#transactions", http.StatusSeeOther)
 }
 
 func parseAmountForSQLC(s string) (int64, error) {
