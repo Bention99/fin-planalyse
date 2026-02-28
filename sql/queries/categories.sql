@@ -1,38 +1,40 @@
 -- name: GetCategoriesIncome :many
-SELECT tc.id, tc.name, tc.type
-FROM (
-SELECT categories.*, COUNT(transactions.id) AS transaction_count
-FROM categories 
-LEFT JOIN transactions 
-ON transactions.category_id = categories.id
-WHERE categories.type = 'income'
-GROUP BY categories.id) tc
-ORDER BY transaction_count DESC;
+SELECT c.id, c.name, c.type, c.is_system
+FROM categories c
+LEFT JOIN transactions t
+ON t.category_id = c.id
+WHERE c.type = 'income'
+AND c.is_system = true
+OR c.type = 'income'
+AND c.user_id = $1
+GROUP BY c.id, c.name, c.type, c.is_system
+ORDER BY COUNT(t.id) DESC;
 
 -- name: GetCategoriesExpense :many
-SELECT tc.id, tc.name, tc.type
-FROM (
-SELECT categories.*, COUNT(transactions.id) AS transaction_count
-FROM categories 
-LEFT JOIN transactions 
-ON transactions.category_id = categories.id
-WHERE categories.type = 'expense'
-GROUP BY categories.id) tc
-ORDER BY transaction_count DESC;
+SELECT c.id, c.name, c.type, c.is_system
+FROM categories c
+LEFT JOIN transactions t
+ON t.category_id = c.id
+WHERE c.type = 'expense'
+AND c.is_system = true
+OR c.type = 'expense'
+AND c.user_id = $1
+GROUP BY c.id, c.name, c.type, c.is_system
+ORDER BY COUNT(t.id) DESC;
 
 -- name: GetCategories :many
-SELECT tc.id, tc.name, tc.type
-FROM (
-SELECT categories.*, COUNT(transactions.id) AS transaction_count
-FROM categories 
-LEFT JOIN transactions 
-ON transactions.category_id = categories.id
-GROUP BY categories.id) tc
-ORDER BY transaction_count DESC;
+SELECT c.id, c.name, c.type, c.is_system
+FROM categories c
+LEFT JOIN transactions t
+ON t.category_id = c.id
+WHERE c.is_system = true
+OR c.user_id = $1
+GROUP BY c.id, c.name, c.type, c.is_system
+ORDER BY COUNT(t.id) DESC;
 
 -- name: CreateCategory :one
-INSERT INTO categories (name, type)
-VALUES ($1, $2)
+INSERT INTO categories (name, type, user_id)
+VALUES ($1, $2, $3)
 RETURNING id, name, type;
 
 -- name: DeleteCategory :exec

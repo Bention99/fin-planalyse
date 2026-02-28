@@ -2,15 +2,16 @@ package main
 
 import (
 	"net/http"
+	"github.com/google/uuid"
 
 	"github.com/Bention99/fin-planalyse/internal/database"
 )
 
 type HomeData struct {
 	User         database.GetUserByIDRow
-	Categories		[]database.Category
-	CategoriesIncome   []database.Category
-	CategoriesExpense   []database.Category
+	Categories		[]database.GetCategoriesRow
+	CategoriesIncome   []database.GetCategoriesIncomeRow
+	CategoriesExpense   []database.GetCategoriesExpenseRow
 	Transactions []database.GetTransactionsRow
 	Error        string
 }
@@ -28,19 +29,24 @@ func (a *app) handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cats, err := a.queries.GetCategories(r.Context())
+	uid := uuid.NullUUID{
+		UUID:  userID,
+		Valid: true,
+	}
+
+	cats, err := a.queries.GetCategories(r.Context(), uid)
 	if err != nil {
 		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	catsIncome, err := a.queries.GetCategoriesIncome(r.Context())
+	catsIncome, err := a.queries.GetCategoriesIncome(r.Context(), uid)
 	if err != nil {
 		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	catsExpense, err := a.queries.GetCategoriesExpense(r.Context())
+	catsExpense, err := a.queries.GetCategoriesExpense(r.Context(), uid)
 	if err != nil {
 		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -79,19 +85,24 @@ func (a *app) renderHomeWithError(w http.ResponseWriter, r *http.Request, msg st
 		return
 	}
 
-	cats, err := a.queries.GetCategories(r.Context())
+	uid := uuid.NullUUID{
+		UUID:  userID,
+		Valid: true,
+	}
+
+	cats, err := a.queries.GetCategories(r.Context(), uid)
 	if err != nil {
 		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	catsIncome, err := a.queries.GetCategoriesIncome(r.Context())
+	catsIncome, err := a.queries.GetCategoriesIncome(r.Context(), uid)
 	if err != nil {
 		http.Error(w, "failed to load categories", http.StatusInternalServerError)
 		return
 	}
 
-	catsExpense, err := a.queries.GetCategoriesExpense(r.Context())
+	catsExpense, err := a.queries.GetCategoriesExpense(r.Context(), uid)
 	if err != nil {
 		http.Error(w, "failed to load categories: "+err.Error(), http.StatusInternalServerError)
 		return
