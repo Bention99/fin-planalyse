@@ -7,6 +7,8 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"fmt"
+	"time"
 )
 
 type ExtractedResponse struct {
@@ -76,6 +78,7 @@ func CreateResponse(apiKey string, promptKey string, fileID string) (ExtractedRe
 
 	payload := map[string]interface{}{
 		"model": "gpt-4.1",
+		"store": false,
 		"prompt": map[string]interface{}{
 			"id": promptKey,
 			"version": "8",
@@ -145,5 +148,43 @@ func CreateResponse(apiKey string, promptKey string, fileID string) (ExtractedRe
 	if err := json.Unmarshal([]byte(jsonString), &parsed); err != nil {
 		return ExtractedResponse{}, err
 	}
+
+	err = DeleteFile(apiKey, fileID)
+	if err != nil {
+		time.Sleep(5 * time.Second)
+
+		err = DeleteFile(apiKey, fileID)
+		if err != nil {
+			fmt.Printf("Couldn't delete file after retry: %v\n", err)
+		}
+	}
+
 	return parsed, nil
+}
+
+func DeleteFile(apiKey, fileID string) error {
+	req, err := http.NewRequest(
+		"DELETE",
+		"https://api.openai.com/v1/files/"+fileID,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to delete file: %s", string(body))
+	}
+
+	return nil
 }

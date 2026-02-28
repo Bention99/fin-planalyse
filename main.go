@@ -20,7 +20,7 @@ type app struct {
 }
 
 func main() {
-	//uploadFile()
+	uploadFile()
 	godotenv.Load(".env")
 	dbURL := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("pgx", dbURL)
