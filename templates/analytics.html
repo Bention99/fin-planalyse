@@ -6,39 +6,38 @@
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
 
-  <h1>Analytics</h1>
+    <h1>Analytics</h1>
 
-  <section class="card">
-    <canvas id="balanceChart"></canvas>
-  </section>
+    <section class="card">
+        <canvas id="balanceChart"></canvas>
+    </section>
 
-</div>
+    <script id="chart-data" type="application/json">
+    {{ .ChartData }}
+    </script>
 
-<script id="chart-data" type="application/json">
-  {{ .ChartData }}
-</script>
+    <script>
+    const raw = document.getElementById('chart-data').textContent;
+    const chartData = JSON.parse(raw);
 
-<script>
-  const raw = document.getElementById('chart-data').textContent;
-  const chartData = JSON.parse(raw);
+    new Chart(document.getElementById('balanceChart'), {
+        type: 'line',
+        data: {
+        labels: chartData.labels,
+        datasets: [{
+            label: 'Balance',
+            data: chartData.values.map(v => v / 100),
+            borderWidth: 2,
+            tension: 0.2
+        }]
+        }
+    });
+    </script>
 
-  new Chart(document.getElementById('balanceChart'), {
-    type: 'line',
-    data: {
-      labels: chartData.labels,
-      datasets: [{
-        label: 'Balance',
-        data: chartData.values.map(v => v / 100),
-        borderWidth: 2,
-        tension: 0.2
-      }]
-    }
-  });
-</script>
-
-<a href="/home" class="btn">Home</a>
+    <a href="/home" class="btn">Home</a>
+    </div>
 
 </body>
 </html>

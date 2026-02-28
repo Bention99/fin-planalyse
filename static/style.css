@@ -181,6 +181,13 @@ tbody tr:hover {
   z-index: 1;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 /* ===== Auth Pages ===== */
 .auth-body {
   display: flex;
