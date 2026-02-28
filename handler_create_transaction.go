@@ -37,9 +37,33 @@ func (a *app) handleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	typePart := strings.TrimSuffix(parts[1], ")")
+
+	aStr := strings.TrimSpace(r.FormValue("amount"))
+
+	amount, err := strconv.ParseFloat(aStr, 64)
+	if err != nil {
+		http.Error(w, "Invalid amount", http.StatusBadRequest)
+		return
+	}
+
+	correctedAmount := amount
+
+	if typePart == "expense" {
+		if amount >= 0 {
+			correctedAmount = amount * -1
+		}
+	}
+
+	if typePart == "income" {
+		if amount <= 0 {
+			correctedAmount = amount * -1
+		}
+	}
+
 	categoryIDStr := cID.String()
 	dateStr := strings.TrimSpace(r.FormValue("date"))
-	amountStr := strings.TrimSpace(r.FormValue("amount"))
+	amountStr := strconv.FormatFloat(correctedAmount, 'f', 2, 64)
 	isOptional := r.FormValue("is_optional") != ""
 
 	categoryID, err := uuid.Parse(categoryIDStr)
@@ -53,7 +77,7 @@ func (a *app) handleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid date (expected YYYY-MM-DD)", http.StatusBadRequest)
 		return
 	}
-	amount, err := parseAmountForSQLC(amountStr)
+	sqlAmount, err := parseAmountForSQLC(amountStr)
 	if err != nil {
 		http.Error(w, "invalid amount", http.StatusBadRequest)
 		return
@@ -63,7 +87,7 @@ func (a *app) handleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 		UserID:     userID,
 		CategoryID: categoryID,
 		Date:       dt,
-		Amount:     amount,
+		Amount:     sqlAmount,
 		IsOptional: isOptional,
 	})
 	if err != nil {

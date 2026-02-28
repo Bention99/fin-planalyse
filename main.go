@@ -62,6 +62,8 @@ func main() {
 	mux.HandleFunc("POST /transactions", a.requireAuth(a.handleCreateTransaction))
 	mux.HandleFunc("POST /transactions/delete", a.requireAuth(a.handleDeleteTransaction))
 
+	mux.HandleFunc("GET /analytics", a.requireAuth(a.handleAnalytics))
+
 	addr := ":8080"
 	log.Printf("http://localhost%s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, mux))

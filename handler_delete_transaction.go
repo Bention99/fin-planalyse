@@ -44,5 +44,5 @@ func (a *app) handleDeleteTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	http.Redirect(w, r, "/home#transactions", http.StatusSeeOther)
 }

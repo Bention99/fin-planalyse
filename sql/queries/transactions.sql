@@ -43,3 +43,9 @@ JOIN categories c ON i.category_id = c.id;
 -- name: DeleteTransaction :execrows
 DELETE FROM transactions
 WHERE id = $1 AND user_id = $2;
+
+-- name: GetBalanceOverTime :many
+SELECT date, SUM(amount) OVER (ORDER BY date) AS balance
+FROM transactions
+WHERE user_id = $1
+ORDER BY date;
