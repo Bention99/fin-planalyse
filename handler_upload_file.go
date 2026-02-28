@@ -1,61 +1,52 @@
 package main
 
-import(
-	"fmt"
+import (
+	"net/http"
 	"os"
-	"path/filepath"
-	"log"
-
-	"github.com/joho/godotenv"
-
-	"github.com/Bention99/fin-planalyse/internal/openaiextract"
+	"io"
+	"strings"
 )
 
-func uploadFile() {
-	godotenv.Load(".env")
+func (a *app) handleUpload(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "invalid form", http.StatusBadRequest)
+		return
+	}
 
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	promptKey := os.Getenv("PROMPTID")
-
-	uploadPath, err := getSingleUploadFilePath("./uploads")
+	file, fh, err := r.FormFile("file")
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, "failed to read file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	filename := strings.ToLower(fh.Filename)
+	if !strings.HasSuffix(filename, ".pdf") {
+		http.Error(w, "only .pdf files are allowed", http.StatusBadRequest)
+		return
+	}
+	if ct := strings.ToLower(fh.Header.Get("Content-Type")); ct != "application/pdf" && ct != "" {
+		http.Error(w, "only PDF uploads are allowed", http.StatusBadRequest)
+		return
 	}
 
-	fileID, err := openaiextract.UploadFile(apiKey, uploadPath)
+	if err := os.MkdirAll("./uploads", 0o755); err != nil {
+		http.Error(w, "cannot create uploads directory", http.StatusInternalServerError)
+		return
+	}
+
+	dstPath := "./uploads/statement.pdf"
+	dst, err := os.Create(dstPath)
 	if err != nil {
-		panic(err)
+		http.Error(w, "cannot create file", http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, file); err != nil {
+		http.Error(w, "cannot save file", http.StatusInternalServerError)
+		return
 	}
 
-	response, err := openaiextract.CreateResponse(apiKey, promptKey, fileID)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(response)
-
-	//os.Remove(uploadPath)
-}
-
-func getSingleUploadFilePath(dir string) (string, error) {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return "", err
-	}
-
-	var files []os.DirEntry
-	for _, e := range entries {
-		if !e.IsDir() {
-			files = append(files, e)
-		}
-	}
-
-	if len(files) == 0 {
-		return "", fmt.Errorf("no files found in %s", dir)
-	}
-	if len(files) > 1 {
-		return "", fmt.Errorf("more than one file found in %s", dir)
-	}
-
-	return filepath.Join(dir, files[0].Name()), nil
+	w.Write([]byte("upload successful"))
 }

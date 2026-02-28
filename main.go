@@ -63,6 +63,8 @@ func main() {
 	mux.HandleFunc("POST /transactions", a.requireAuth(a.handleCreateTransaction))
 	mux.HandleFunc("POST /transactions/delete", a.requireAuth(a.handleDeleteTransaction))
 
+	mux.HandleFunc("POST /upload", a.handleUpload)
+
 	mux.HandleFunc("GET /analytics", a.requireAuth(a.handleAnalytics))
 
 	addr := ":8080"
