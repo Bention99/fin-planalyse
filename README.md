@@ -7,7 +7,7 @@ analyze financial behavior in a structured and scalable way.
 
 ------------------------------------------------------------------------
 
-## 💡 Why I Built Fin-Planalyse
+## 💡 Motivation
 
 Tracking your budget down to each individual transaction can be a lot of work, especially if your bank doesn’t provide meaningful analysis or flexible categorization options.
 
@@ -46,7 +46,7 @@ FinPlanalyse gives you full control over your financial data. It combines detail
 
 ------------------------------------------------------------------------
 
-## ⚙️ Setup
+## ⚙️ Quick Start
 
 ### 1. Clone the repository
 
@@ -80,6 +80,16 @@ App runs at:
 
 ------------------------------------------------------------------------
 
+## 🎮 Usage
+
+-   Create an account
+-   Manage categories (system or custom)
+-   Add transactions manually
+-   Upload bank statements (PDF) for automatic extraction
+-   Analyze your income and expenses
+
+------------------------------------------------------------------------
+
 ## 🤖 AI Transaction Extraction
 
 FinPlanalyse integrates with OpenAI to:
@@ -109,3 +119,9 @@ Only one file is stored at a time.
 ## 📄 License
 
 This project is currently for educational and personal use.
+
+------------------------------------------------------------------------
+
+## 🪄 Contributing
+
+If you have ideas, improvement suggestions, or would like to contribute, feel free to open an issue or submit a pull request. Any feedback is welcome, whether it’s about features, code structure, performance, or overall design.
